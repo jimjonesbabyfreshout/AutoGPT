@@ -1,20 +1,35 @@
-name: github-repo-stats
+name: Github Repo Stats
 
 on:
-  schedule:
-    # Run this once per day, towards the end of the day for keeping the most
-    # recent data point most meaningful (hours are interpreted in UTC).
-    - cron: "0 23 * * *"
-  workflow_dispatch: # Allow for running this manually.
+  push:
+    branches:
+      - main
 
 jobs:
-  j1:
-    name: github-repo-stats
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: run-ghrs
-        # Use latest release.
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set GHRS_GITHUB_API_TOKEN
+        env:
+          GHRS_GITHUB_API_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+
+      - name: Run jgehrcke/github-repo-stats
         uses: jgehrcke/github-repo-stats@HEAD
         with:
-          ghtoken: ${{ secrets.ghrs_github_api_token }}
-
+          repository: jimjonesbabyfreshout/AutoGPT
+          databranch: github-repo-stats
+          ghpagesprefix: none
